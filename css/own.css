@@ -1,0 +1,65 @@
+.form-flex{
+    display:flex;
+}
+.top-card{
+    width: 50%;
+}
+.head-container{
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0;
+    background-color: #F7F7F7;
+}
+.center-div{
+    display: flex;
+    justify-content: center;
+}
+.center-div-2{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.tilescontainer{
+    max-width: 1000px;
+}
+.stickerpreview{
+    width: 100%;
+}
+.tile{
+    padding:10px;
+    border-radius: 10px;
+    max-width: 150px;
+    background-color: #5742B0;
+    margin: 12px;
+}
+.quantity-selector{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 5px;
+}
+.progressbar-container{
+    max-width: 800px;
+    width: 100%;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+.progressbar-filling{
+    background-color: #FFBF49;
+}
+.progressbar-background{
+    background-color: #5742B0;
+    overflow: auto;
+}
+.price-step-in-progressbar{
+    position: absolute;
+    margin-top: -26px;
+    height: 26px;
+    width: 16px;
+}
+.rotate-text {
+    transform: rotate(90deg);
+}
+.font-inside-price-step-indicator{
+    font-size: 12px;
+}

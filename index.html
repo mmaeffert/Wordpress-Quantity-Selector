@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page Title</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="css/own.css" />
+  </head>
+  <body onresize="repositionPriceStepIndicator()">
+    <h1>Moin</h1>
+    <div class="head-container">
+        <button id="load-data">Load data</button>
+        <div class="center-div">
+            <div style="display: flex;">
+                <h1>Quantity: </h1>
+                <h1 id="quantity-display"></h1>
+            </div>
+        </div>
+        <div class="center-div">
+            <div class="progressbar-container">
+                <div class="w3-border w3-round progressbar-background">
+                    <div id="progressbar" class="w3-round progressbar-filling" style="height:24px;width:80%"></div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: 5px;" class="center-div">
+            <button id="fill-up">Auffüllen</button>
+        </div>
+        <div>
+            <div style="display: flex;">
+                <h1>Current price: </h1>
+                <h1 id="price-display"></h1>
+            </div>
+        </div>
+    </div>
+    <div class="tilescontainer center-div" >
+        <div class="center-div-2" id="tiles-container">
+
+        </div>
+    </div>
+  </body>
+</html>
+
+<script>
+
+    // Enthält alle Sticker als objekt mit den parametern id, bildURL und quantity
+    var tiles = []
+
+    // Enthält die Preisstufen als Objekt mit den Paramtern quantity und price
+    var prices = []
+
+    // Ich glaube das kann weg, aber ich trau mich nicht
+    var targetQuantity = 80
+
+    //Aktuelle Summe der ausgewählten Sticker
+    var currentQuantity = 0
+
+    //Glaube auch das kann weg aber ich trau mich nicht
+    var maxQuantity = 270
+
+    // Width der progress bar
+    var progressBarWidth
+
+    // Template für ein tile. Ein Tile ist ein rechteck, bestehend aus dem Sticker und dem quantity selector
+    const TILETEMPLATE = `
+    <div class="tile">
+        <img class="stickerpreview" src="{imgsrc}">
+        <div id="{id}" class="quantity-selector">
+            <button class="minus">-</button>
+            <div class="quantity-indicator">
+                <div id="quantity{id}">{quantity}</div>
+            </div>
+            <button class="plus">+</button>
+        </div>
+    </div>
+    `
+
+    $(document).ready(function() {
+        console.log("Loaded")
+        $.getJSON('data.json', function(data) {
+
+            // Fülle Paramter mit daten
+            tiles = data["tiles"]
+            targetQuantity = data["targetQuantity"]
+            currentQuantity = targetQuantity
+            maxQuantity = data["prices"][data["prices"].length - 1]["quantity"]
+            prices = data["prices"]
+            progressBarWidth = $(".progressbar-container").width()
+            adjustQuantityDisplay()
+            updateProgessbar()
+            updatePrice()
+            createPriceStepIndicators()
+        });
+    });
+
+    $('#load-data').click(function() {
+        createTiles()
+    });
+
+    // Eventlistener für wenn ein Minus im Quantity Selector angeklickt wird
+    $(document).on('click', '.minus', function() {
+        adjustQuantity($(this).parent().attr("id"), false)
+    });
+
+    // Eventlistener für wenn ein Plus im Quantity Selector angeklickt wird
+    $(document).on('click', '.plus', function() {
+        adjustQuantity($(this).parent().attr("id"))
+    });
+
+    // Eventlistener für den "auffüllen" Knopf
+    $(document).on('click', '#fill-up', function() {
+        fillUp()
+    });
+
+    // Fühlt die Anzahl der Sticker von vorne nach hinten bis zum nächsten Preis-step auf
+    function fillUp(){
+        var index = 0
+        const targetQuantity = getCurrentQuantity()
+        while(currentQuantity < targetQuantity){
+            if(index == tiles.length) index = 0
+            adjustQuantity(tiles[index]["id"])
+            index++
+        }
+    }
+
+    // Erstellt die Objekte, die in der Progress bar die Preisschritte anzeigen. Im Folgendn "priceStepIndicator" genannt
+    function createPriceStepIndicators(){
+        prices.forEach(priceStep => {
+            var progressBar = $(".progressbar-container")
+            progressBar.html(progressBar.html() + '<div class="price-step-in-progressbar" quantity="' + priceStep["quantity"] + '"><div class="font-inside-price-step-indicator rotate-text">' + priceStep["quantity"] + '</div></div>')
+        })
+        adjustPriceStepIndicator()
+        repositionPriceStepIndicator()
+    }
+
+    // Positioniert die priceStepIndicator passend zur Breite der Progress Bar
+    function repositionPriceStepIndicator(){
+        const progressBarWidth = $(".progressbar-background").width()
+        $(".price-step-in-progressbar").each(function(){
+            $(this).css("margin-left", $(this).attr("quantity") / maxQuantity * progressBarWidth - 8)
+        })
+    }
+
+    // Setzt die Farbe der PriceStepIndicator passend dazu, ob die PriceSteps bereits erreicht wurden
+    function adjustPriceStepIndicator(){
+        const progressBarWidth = $(".progressbar-background").width()
+        $(".price-step-in-progressbar").each(function(){
+            $(this).css("background-color", currentQuantity >= $(this).attr("quantity") ? "#2D9E92" : "#FFBF49")
+        })
+    }
+
+    // Wird gerufen, immer wenn eine Quantity eines einzelnen Sticker geändert wird. Braucht id des Stickers
+    function adjustQuantity(id, plus=true, quantity=-1){
+        if(quantity == -1){
+            var selectedTile = getTileFromID(id)
+            var selectedTileQuantity = selectedTile["quantity"] + (plus ? 1 : -1)
+            selectedTile["quantity"] = selectedTileQuantity
+            $("#quantity" + id).html(selectedTileQuantity)
+        }
+        adjustQuantityDisplay()
+        updatePrice()
+        updateProgessbar()
+        adjustPriceStepIndicator()
+    }
+
+    // Rechnet die Summe der Sticker und stellt diese dar
+    function adjustQuantityDisplay(){
+        sum = 0
+        tiles.forEach(tile => {
+            sum += tile["quantity"]
+        });
+        currentQuantity = sum
+        updateTargetQuantity()
+        $("#quantity-display").html(currentQuantity + "/" + targetQuantity)
+    }
+
+    // Gibt den Sticker einer ID als objekt zurück
+    function getTileFromID(id){
+        var targetIndex = -1
+        for(i = 0; i < tiles.length; i++){
+            if(targetIndex == -1 && tiles[i].id == id){
+                targetIndex = i
+            }
+        }
+        return tiles[targetIndex]
+    }
+
+    // Erstellt für jeden Sticker ein tile
+    function createTiles(){
+        var tilesString = ""
+        tiles.forEach(tile => {
+            var tempString = TILETEMPLATE.replace("{imgsrc}", tile["imageURL"])
+            tempString = tempString.replace("{id}", tile["id"])
+            tempString = tempString.replace("{id}", tile["id"])
+            tempString = tempString.replace("{quantity}", tile["quantity"])
+            tilesString += tempString
+        });
+        $("#tiles-container").html(tilesString)
+    }
+
+    function updateProgessbar(){
+        $( "#progressbar" ).css("width", (currentQuantity / maxQuantity * 100) + "%")
+    }
+
+    function updatePrice(){
+        $("#price-display").html(getCurrentPrice())
+    }
+
+    // Target Quantity ist die Quantity des nächsten Preisschrittes
+    function updateTargetQuantity(){
+        targetQuantity = getCurrentQuantity()
+    }
+
+    // Gibt den aktuellen Preis zurück
+    function getCurrentPrice(target = "price"){
+        var result = -1
+        for(i = 0; i < prices.length; i++){
+            if((i == prices.length - 1 && result == -1) || (currentQuantity > prices[i]["quantity"] && currentQuantity <= prices[i+1]["quantity"])){
+                result = prices[i + (target == "price" ? 0 : 1)]["price"]
+            }
+        }
+        return result
+    }
+
+    // Gibt die Aktuelle Zielquantity zurück
+    function getCurrentQuantity(){
+        result = -1
+        for(i = 0; i < prices.length; i++){
+            if(i == prices.length - 1 && result == -1){
+                result = prices[i]["quantity"]
+            }
+            else if(currentQuantity > prices[i]["quantity"] && currentQuantity <= prices[i+1]["quantity"]){
+                result = prices[i + 1]["quantity"]
+            }
+        }
+        return result
+    }
+</script>

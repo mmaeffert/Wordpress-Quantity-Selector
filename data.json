@@ -1,0 +1,70 @@
+{
+    "tiles":[
+        {
+            "id": 1,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 2,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 3,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 4,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 5,
+            "imageURL": "./img.jpg",
+            "quantity": 9
+        },
+        {
+            "id": 6,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 7,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 8,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 9,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        },
+        {
+            "id": 10,
+            "imageURL": "./img.jpg",
+            "quantity": 10
+        }
+    ],
+    "targetQuantity": 100,
+    "prices":[
+        {
+            "quantity": 60,
+            "price": 10
+        },        {
+            "quantity": 100,
+            "price": 15
+        },        {
+            "quantity": 150,
+            "price": 17
+        },        {
+            "quantity": 270,
+            "price": 20
+        }
+    ]
+}
